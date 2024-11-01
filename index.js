@@ -1,41 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const studentRoutes = require('./routes/student');
-const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
-require('dotenv').config(); // Load environment variables
-
-// Initialize Express app
-const app = express();
-const PORT = process.env.PORT || 3001;
-
-// Parse the CORS_ORIGINS environment variable into an array
-const whitelist = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : [];
-
-const corsOptions = {
-    origin: function (origin, callback) {
-        if (whitelist.includes(origin) || !origin) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true
-};
-
-// Middleware
-app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error('MongoDB connection error:', err));
-
-// Use student routes
-app.use('/api', studentRoutes);
+require('dotenv').config();
 
 // Import models
 const Visited = require('./models/Visited');
@@ -45,6 +11,35 @@ const Activity = require('./models/Activity');
 const Achievement = require('./models/Achievement');
 const AcademicCentre = require('./models/AcademicCentre');
 const Notice = require('./models/Notice');
+const Student = require('./routes/student'); // Ensure this path is correct
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// CORS setup
+const whitelist = ['http://localhost:5173', 'https://insanedc.vercel.app'];
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (whitelist.indexOf(origin) !== -1 || !origin) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+};
+
+app.use(cors(corsOptions));
+app.use(express.json()); // Parse JSON
+
+// MongoDB connection
+mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log('MongoDB connected'))
+    .catch(err => console.error('MongoDB connection error:', err));
+
+// Use student routes for student registration
+
+app.use('/api/student', Student);
 
 // Routes for fetching collections
 app.get('/api/activities', async (req, res) => {
@@ -54,10 +49,6 @@ app.get('/api/activities', async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Error fetching activities', error: error.message });
     }
-});
-
-app.get('/', async (req, res) => {
-    res.send("All is well");
 });
 
 app.get('/api/achievements', async (req, res) => {
@@ -108,7 +99,7 @@ app.get('/api/academic-centres', async (req, res) => {
 // GET all notices
 app.get('/api/notices', async (req, res) => {
     try {
-        const notices = await Notice.find().sort({ position: 1 });
+        const notices = await Notice.find().sort({ position: 1 }); // Fetch notices sorted by position
         res.json(notices);
     } catch (error) {
         console.error('Error fetching notices:', error);
