@@ -2,19 +2,19 @@ const express = require('express');
 const Student = require('../models/Student');
 const router = express.Router();
 
-// POST Route for student registration
-router.post('/student', async (req, res) => {
+router.post('/', async (req, res) => {
     try {
+        console.log(req.body); // Log the request body
         const {
             studentName, institution, dob, parentName,
             address, whatsapp, phone, classes,
             healthIssues, healthDescription, academicCentre,
-            passportPhoto
+            passportPhoto,termsAccepted
         } = req.body;
 
         // Validate required fields
-        if (!studentName || !passportPhoto) {
-            return res.status(400).send('Missing required fields: Student Name or Passport Photo.');
+        if (!studentName || !passportPhoto ) {
+            return res.status(400).send('Missing required fields: Student Name, Passport Photo, or Terms Accepted.');
         }
 
         // Create new student
@@ -22,7 +22,7 @@ router.post('/student', async (req, res) => {
             studentName, institution, dob, parentName,
             address, whatsapp, phone, classes,
             healthIssues, healthDescription, academicCentre,
-            passportPhoto
+            passportPhoto, termsAccepted // Include termsAccepted
         });
 
         // Save to MongoDB
@@ -35,5 +35,6 @@ router.post('/student', async (req, res) => {
         res.status(500).json({ error: 'Failed to register student. Please try again later.' });
     }
 });
+
 
 module.exports = router;
