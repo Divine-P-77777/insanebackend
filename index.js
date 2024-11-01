@@ -17,7 +17,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // CORS setup
-const whitelist = ['http://localhost:5173', 'https://insanedanzecompany.vercel.app/'];
+const whitelist = ['http://localhost:5173', 'https://insanedanzecompany.vercel.app'];
 const corsOptions = {
     origin: function (origin, callback) {
         if (whitelist.indexOf(origin) !== -1 || !origin) {
